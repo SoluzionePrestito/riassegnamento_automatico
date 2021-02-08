@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="https://www.soluzioneprestito.it/riassegnamento_automatico.php" method="get" class="form-personalizzato-1" id = "my-form">
+          <div class="form-group">
+            <select class = "form-personalizzato-select"id="stato" style="font-family:Montserrat" name="stato">
+                <option value="" selected disabled hidden>Seleziona lo Stato <span>&#10142;</span></option>
+                    <option value="1">NON RISPONDE</option>
+                    <option value="2">NON RISPONDE 2</option>
+                    <option value="3">NON RISPONDE 3</option>
+                    <option value="4">NON RISPONDE 4</option>
+                    <option value="5">NON RISPONDE 5</option>
+                    <option value="6">MAI REPERIBILE</option>
+                    <option value="7">FORMULATA OFFERTA</option>
+                    <option value="8">FEEDBACK QUOTA CEDIBILE</option>
+                    <option value="9">APPUNTAMENTO TELEFONICO</option>
+                    <option value="10">APPUNTAMENTO IN FILIALE</option>
+             </select>
+          </div>
+          <div class="form-group">
+            <select class = "form-personalizzato-select" id="professione" name="professione"  style="font-family:Montserrat">
+                <option value="" selected disabled hidden>Seleziona il lasso di tempo <span>&#10142;</span></option>
+                <option value="Dipendente Statale">Ieri</option>
+                <option value="Dipendente Statale">10 giorni</option>
+                <option value="Forze dell'Ordine">1 settimana fa</option>
+                <option value="Forze Armate">2 settimane fa</option>
+              </select>
+          </div>
+         <!-- Php script section -->
+         <!-- Url for testing: http://localhost:8888/ScriptForm%20soluzioneprestito/?bnd=test&ch=test2&mdm=test3&ctry=ok&cmp=ok2&cmpid=ok3&var=test&adgid=test1&adg=test2&adid=test3&dvc=test4&kwd=try&mtch=try2&tp=ie&subvar=sub&pg=pg -->
+        <button class = "form-personalizzato-button"type="submit" class="btn btn-primary">INVIA</button>
+        </div>
+      </form>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <?php 
-    $previous_week = date("Y-m-d", strtotime("last week monday"));
+    $un_mese_fa = date("Y-m-d", strtotime("-1 month"));
+    echo $un_mese_fa;
     $lte ='lte';
     
     //SETOPT CURL
@@ -10,15 +11,17 @@
     $json = json_decode($response,true);
     $access_token =  "Bearer " .$json['access_token'];
 
+    // $query = construct_query();
+
     //QUERY SU OPPORTUNITY PER PRATICHE NON RISPONDE CON MODIFICA INFEIRORE A 7 GG
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$previous_week T00:00:00+01:00\"},\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 5000,\n\t\"skip\": 0\n}");
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$un_mese_fa T00:00:00+01:00\"},\n\t\t\"laststato\": \"RICHIESTA DOC PER CARICAMENTO\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
     $response = curl_exec($curl);
     $json_search_query1 = json_decode($response,true);
     // var_dump($json_search_query1);
     $count_query1 =  count($json_search_query1['result']);
 
     //QUERY SU OPPORTUNITY PER PRATICHE NUOVO CONTATTO
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}");
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
     $response = curl_exec($curl);
     $json_search_query2 = json_decode($response,true);
     // var_dump($json_search_query2);
@@ -79,7 +82,7 @@
       } else {
         echo "0 results";
       }
-    var_dump($elenco_totale_agenti);
+    // var_dump($elenco_totale_agenti);
 
     // VERIFICHIAMO CHI NON è PRESENTE IN $totale_pratiche_per_agente
     for ($i=0; $i < count($elenco_agenti_disponibili) && $i != count($elenco_totale_agenti); $i++) { 
@@ -95,11 +98,11 @@
     $totale_pratiche_per_agente= array_count_values($elenco_agenti_disponibili);
     // asort($totale_pratiche_per_agente);
     // $nome_prima_posizione = key($totale_pratiche_per_agente);
+    echo 'ELENCO INIZIALE: ' . '<br>';
     var_dump($totale_pratiche_per_agente);
 
     for ($i=0; $i < count($elenco_pratiche_da_riassegnare); $i++) { 
         asort($totale_pratiche_per_agente);
-        var_dump($totale_pratiche_per_agente);
         $nome_prima_posizione = key($totale_pratiche_per_agente);
         for ($y=0; $y < count($elenco_totale_agenti) ; $y++) { 
             if($elenco_totale_agenti[$y]['nomevisualizzato'] == $nome_prima_posizione){
@@ -110,15 +113,15 @@
                 echo 'Commerciale ID: ' . $agenteId . '. ' . 'Mail: ' . $email1  . '. ' . 'Sede: ' . $nomesede . '. ' . 'Manager: '. $manager_id . ' Pratica affidata: '. $elenco_pratiche_da_riassegnare[$i] . '<br>';
 
                 my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
+                // echo emailSide($email1,$elenco_pratiche_da_riassegnare[$i]) . '<br>' . '<br>';
             }
         }
         $totale_pratiche_per_agente[$nome_prima_posizione] = $totale_pratiche_per_agente[$nome_prima_posizione]+1;
     }
     
-    // asort($totale_pratiche_per_agente);
-    // var_dump($totale_pratiche_per_agente);
-    // $first_key = key($totale_pratiche_per_agente) . array_shift($totale_pratiche_per_agente);
-    // echo $first_key;
+    asort($totale_pratiche_per_agente);
+    echo 'ELENCO FINALE ORDINATO: ' . '<br>';
+    var_dump($totale_pratiche_per_agente);
     
  
 
@@ -183,6 +186,26 @@
             ),
           ));
           echo $response = curl_exec($curl);
+    }
+
+    function emailSide($to ,$praticaId){
+        $subject = 'Nuova pratica riassegnata';
+        $message = '<html>
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            </head>
+            <body>';
+        $message .= " <br> Ciao, ti è stata riassegnata la pratica numero: " . $praticaId ."</br>";
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From: <ufficiomarketing@soluzioneprestito.it>" . "\r\n";
+
+        // mail($to, $subject, $message, $headers);
+        return 'Mail: ' . $message . ' To: ' . $to;
+    }
+
+    function construct_query($time,$condizione){
+        $query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$time T00:00:00+01:00\"},\n\t\t\"laststato\": \"$condizione\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}";
     }
 ?>
 
