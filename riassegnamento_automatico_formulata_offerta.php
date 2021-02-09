@@ -1,4 +1,5 @@
 <?php
+
     $due_settimane_fa = date("Y-m-d", strtotime('-15 days'));
     $lte ='lte';
     
@@ -35,93 +36,93 @@
     var_dump($elenco_pratiche_da_riassegnare);
 
    //CREAZIONE ARRAY AGENTI CON PRATICHE AFFIDATE AD ESSI
-    // for ($i=0; $i < $count_query1; $i++) { 
-    //     $elenco_agenti_disponibili[$i]= $json_search_query1['result'][$i]['agente'];
-    // }
-    // $count_array1 = count($elenco_agenti_disponibili) +1;
+    for ($i=0; $i < $count_query1; $i++) { 
+        $elenco_agenti_disponibili[$i]= $json_search_query1['result'][$i]['agente'];
+    }
+    $count_array1 = count($elenco_agenti_disponibili) +1;
 
-    // for ($i=0; $i < $count_query2; $i++) { 
-    //     $elenco_agenti_disponibili[$count_array1]= $json_search_query2['result'][$i]['agente'];
-    //     $count_array1++;
-    // }
-    // // echo 'ELENCO AGENTI DISPONIBILI';
-    // // var_dump($elenco_agenti_disponibili);
+    for ($i=0; $i < $count_query2; $i++) { 
+        $elenco_agenti_disponibili[$count_array1]= $json_search_query2['result'][$i]['agente'];
+        $count_array1++;
+    }
+    // echo 'ELENCO AGENTI DISPONIBILI';
+    // var_dump($elenco_agenti_disponibili);
 
 
-    // //MYSQL FOR TAKE DATA
+    //MYSQL FOR TAKE DATA
 
-    // //connesione db
-    // $servername = "34.82.67.217";
-    // $username_db = "SolPrest";
-    // $password_db = "SolPrest2020!";
-    // $database = "EGG_DUMP";
+    //connesione db
+    $servername = "34.82.67.217";
+    $username_db = "SolPrest";
+    $password_db = "SolPrest2020!";
+    $database = "EGG_DUMP";
 
-    // $conn = new mysqli($servername, $username_db, $password_db, $database);
+    $conn = new mysqli($servername, $username_db, $password_db, $database);
 
-    // // VERIFICA DELLA CONNESSIONE
-    // if ($conn->connect_error) {
-    //     die("Connection failed: " . $conn->connect_error);
-    // }
-    // $sqlQuery = 'SELECT * FROM EGG_DUMP.INFO_VENDITORI';
-    // $result = $conn->query($sqlQuery);
-    // $elenco_totale_agenti=[];
-    // if ($result->num_rows > 0) {
-    //     // output data of each row
-    //     $i=0;
-    //     while($row = $result->fetch_assoc()) {
-    //         $elenco_totale_agenti[$i]["nomevisualizzato"] = $row["nomevisualizzato"];
-    //         $elenco_totale_agenti[$i]["agenteID"] = $row["agenteID"];
-    //         $elenco_totale_agenti[$i]["email1"] = $row["email1"];
-    //         $elenco_totale_agenti[$i]["sedeID"] = $row["sedeID"];
-    //         $elenco_totale_agenti[$i]["team_id"] = $row["team_id"];
-    //         $elenco_totale_agenti[$i]["manager_id"] = $row["manager_id"];
-    //         $elenco_totale_agenti[$i]["nomesede"] = $row["nomesede"];
-    //         $i++;
-    //     }
-    //   } else {
-    //     echo "0 results";
-    //   }
-    // // var_dump($elenco_totale_agenti);
+    // VERIFICA DELLA CONNESSIONE
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    $sqlQuery = 'SELECT * FROM EGG_DUMP.INFO_VENDITORI';
+    $result = $conn->query($sqlQuery);
+    $elenco_totale_agenti=[];
+    if ($result->num_rows > 0) {
+        // output data of each row
+        $i=0;
+        while($row = $result->fetch_assoc()) {
+            $elenco_totale_agenti[$i]["nomevisualizzato"] = $row["nomevisualizzato"];
+            $elenco_totale_agenti[$i]["agenteID"] = $row["agenteID"];
+            $elenco_totale_agenti[$i]["email1"] = $row["email1"];
+            $elenco_totale_agenti[$i]["sedeID"] = $row["sedeID"];
+            $elenco_totale_agenti[$i]["team_id"] = $row["team_id"];
+            $elenco_totale_agenti[$i]["manager_id"] = $row["manager_id"];
+            $elenco_totale_agenti[$i]["nomesede"] = $row["nomesede"];
+            $i++;
+        }
+      } else {
+        echo "0 results";
+      }
+    // var_dump($elenco_totale_agenti);
 
-    // // VERIFICHIAMO CHI NON è PRESENTE IN $totale_pratiche_per_agente
-    // for ($i=0; $i < count($elenco_agenti_disponibili) && $i != count($elenco_totale_agenti); $i++) { 
-    //     if(in_array($elenco_totale_agenti[$i]["nomevisualizzato"], $elenco_agenti_disponibili)){
-    //     }else{
-    //          $elenco_agenti_disponibili[] = $elenco_totale_agenti[$i]["nomevisualizzato"];
-    //     }
-    // }
+    // VERIFICHIAMO CHI NON è PRESENTE IN $totale_pratiche_per_agente
+    for ($i=0; $i < count($elenco_agenti_disponibili) && $i != count($elenco_totale_agenti); $i++) { 
+        if(in_array($elenco_totale_agenti[$i]["nomevisualizzato"], $elenco_agenti_disponibili)){
+        }else{
+             $elenco_agenti_disponibili[] = $elenco_totale_agenti[$i]["nomevisualizzato"];
+        }
+    }
 
-    // // var_dump($elenco_agenti_disponibili);
+    // var_dump($elenco_agenti_disponibili);
 
-    // //CREAZIONE ARRAY AGENTI CON COUNT PER OGNI PRATICA
-    // $totale_pratiche_per_agente= array_count_values($elenco_agenti_disponibili);
-    // // asort($totale_pratiche_per_agente);
-    // // $nome_prima_posizione = key($totale_pratiche_per_agente);
-    // echo 'ELENCO INIZIALE: ' . '<br>';
-    // var_dump($totale_pratiche_per_agente);
-
-    // for ($i=0; $i < count($elenco_pratiche_da_riassegnare); $i++) { 
-    //     asort($totale_pratiche_per_agente);
-    //     // var_dump($totale_pratiche_per_agente);
-    //     $nome_prima_posizione = key($totale_pratiche_per_agente);
-    //     for ($y=0; $y < count($elenco_totale_agenti) ; $y++) { 
-    //         if($elenco_totale_agenti[$y]['nomevisualizzato'] == $nome_prima_posizione){
-    //             $agenteId = $elenco_totale_agenti[$y]['agenteID'];
-    //             $email1 = $elenco_totale_agenti[$y]['email1'];
-    //             $nomesede = $elenco_totale_agenti[$y]['nomesede'];
-    //             $manager_id = $elenco_totale_agenti[$y]['manager_id'];
-    //             echo 'Commerciale ID: ' . $agenteId . '. ' . 'Mail: ' . $email1  . '. ' . 'Sede: ' . $nomesede . '. ' . 'Manager: '. $manager_id . ' Pratica affidata: '. $elenco_pratiche_da_riassegnare[$i] . '<br>';
-
-    //             my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
-    //             // echo emailSide($email1,$elenco_pratiche_da_riassegnare[$i]) . '<br>' . '<br>';
-    //         }
-    //     }
-    //     $totale_pratiche_per_agente[$nome_prima_posizione] = $totale_pratiche_per_agente[$nome_prima_posizione]+1;
-    // }
-    
+    //CREAZIONE ARRAY AGENTI CON COUNT PER OGNI PRATICA
+    $totale_pratiche_per_agente= array_count_values($elenco_agenti_disponibili);
     // asort($totale_pratiche_per_agente);
-    // echo 'ELENCO FINALE ORDINATO: ' . '<br>';
-    // var_dump($totale_pratiche_per_agente);
+    // $nome_prima_posizione = key($totale_pratiche_per_agente);
+    echo 'ELENCO INIZIALE: ' . '<br>';
+    var_dump($totale_pratiche_per_agente);
+
+    for ($i=0; $i < count($elenco_pratiche_da_riassegnare); $i++) { 
+        asort($totale_pratiche_per_agente);
+        // var_dump($totale_pratiche_per_agente);
+        $nome_prima_posizione = key($totale_pratiche_per_agente);
+        for ($y=0; $y < count($elenco_totale_agenti) ; $y++) { 
+            if($elenco_totale_agenti[$y]['nomevisualizzato'] == $nome_prima_posizione){
+                $agenteId = $elenco_totale_agenti[$y]['agenteID'];
+                $email1 = $elenco_totale_agenti[$y]['email1'];
+                $nomesede = $elenco_totale_agenti[$y]['nomesede'];
+                $manager_id = $elenco_totale_agenti[$y]['manager_id'];
+                echo 'Commerciale ID: ' . $agenteId . '. ' . 'Mail: ' . $email1  . '. ' . 'Sede: ' . $nomesede . '. ' . 'Manager: '. $manager_id . ' Pratica affidata: '. $elenco_pratiche_da_riassegnare[$i] . '<br>';
+
+                my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
+                // echo emailSide($email1,$elenco_pratiche_da_riassegnare[$i]) . '<br>' . '<br>';
+            }
+        }
+        $totale_pratiche_per_agente[$nome_prima_posizione] = $totale_pratiche_per_agente[$nome_prima_posizione]+1;
+    }
+    
+    asort($totale_pratiche_per_agente);
+    echo 'ELENCO FINALE ORDINATO: ' . '<br>';
+    var_dump($totale_pratiche_per_agente);
     
  
 

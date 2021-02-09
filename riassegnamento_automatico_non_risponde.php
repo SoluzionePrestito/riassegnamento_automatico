@@ -1,5 +1,15 @@
 <?php 
-    $dieci_giorni_fa = date("Y-m-d", strtotime("-10 days"));
+     if(isset($_GET['stato']) && isset($_GET['data'])){
+        $stato = $_GET['stato'];
+        $data = $_GET['data'];
+    }else{
+        exit('Errore su data o stato, riprovare');
+    }
+
+    if(isset($_GET['count'])){
+        $count = $_GET['count'];
+    }
+
     $lte ='lte';
     
     //SETOPT CURL
@@ -13,7 +23,7 @@
     // $query = construct_query();
 
     //QUERY SU OPPORTUNITY PER PRATICHE NON RISPONDE CON MODIFICA INFEIRORE A 7 GG
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$dieci_giorni_fa T00:00:00+01:00\"},\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$data T00:00:00+01:00\"},\n\t\t\"laststato\": \"$stato\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
     $response = curl_exec($curl);
     $json_search_query1 = json_decode($response,true);
     // var_dump($json_search_query1);
@@ -33,6 +43,7 @@
     }
     echo 'ELENCO PRATICHE:';
     var_dump($elenco_pratiche_da_riassegnare);
+    $count += count($elenco_pratiche_da_riassegnare);
 
    //CREAZIONE ARRAY AGENTI CON PRATICHE AFFIDATE AD ESSI
     for ($i=0; $i < $count_query1; $i++) { 
@@ -112,7 +123,7 @@
                 $manager_id = $elenco_totale_agenti[$y]['manager_id'];
                 echo 'Commerciale ID: ' . $agenteId . '. ' . 'Mail: ' . $email1  . '. ' . 'Sede: ' . $nomesede . '. ' . 'Manager: '. $manager_id . ' Pratica affidata: '. $elenco_pratiche_da_riassegnare[$i] . '<br>';
 
-                my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
+                // my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
                 // echo emailSide($email1,$elenco_pratiche_da_riassegnare[$i]) . '<br>' . '<br>';
             }
         }
@@ -123,7 +134,16 @@
     echo 'ELENCO FINALE ORDINATO: ' . '<br>';
     var_dump($totale_pratiche_per_agente);
     
- 
+    echo 'Totale pratiche processate: ' . $count .'<br>';
+    
+    // sleep(10);
+    // //redirect per altro script
+    // echo 'Lancio Script: NON RISPONDE 2' . '<br>';
+    // $script= file_get_contents('http://localhost:8888/riassegnamento_automatico/riassegnamento_automatico_non_risponde_2.php');
+    // if($script == true){
+    //     echo 'Success' . '<br>';
+    //     echo $script;
+    // }
 
 
  
