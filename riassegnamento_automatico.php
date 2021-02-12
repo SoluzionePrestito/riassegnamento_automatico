@@ -1,54 +1,94 @@
-
-  
 <?php 
-     if(isset($_GET['stato']) && isset($_GET['data'])){
-        $stato = $_GET['stato'];
-        $data = $_GET['data'];
-    }else{
-        exit('Errore su data o stato, riprovare');
-    }
+    // if(isset($_GET['stato']) && isset($_GET['data'])){
+    //     $stato = $_GET['stato'];
+    //     $data = $_GET['data'];
+    // }else{
+    //     exit('Errore su data o stato, riprovare');
+    // }
+
+    $stato = 'RIASSEGNATA';
+    $data = $data = date("Y-m-d", strtotime("-1 day"));;
 
     if(isset($_GET['count'])){
         $count = $_GET['count'];
     }
-
-    $lte ='lte';
-    
     //SETOPT CURL
     $curl = curl_init();
     my_curl_setopt($curl);
     $response = curl_exec($curl);
-
+    $lte ='lte';
     $json = json_decode($response,true);
     $access_token =  "Bearer " .$json['access_token'];
 
     // $query = construct_query();
 
     //QUERY SU OPPORTUNITY PER PRATICHE NON RISPONDE CON MODIFICA INFEIRORE A 7 GG
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$data T00:00:00+01:00\"},\n\t\t\"laststato\": \"$stato\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$data T00:00:00+01:00\"},\n\t\t\"laststato\": \"$stato\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}");
     $response = curl_exec($curl);
     $json_search_query1 = json_decode($response,true);
     // var_dump($json_search_query1);
     $count_query1 =  count($json_search_query1['result']);
 
-    //QUERY SU OPPORTUNITY PER PRATICHE NUOVO CONTATTO
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
+    
+//     //QUERY SU OPPORTUNITY PER PRATICHE NUOVO CONTATTO
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 5000,\n\t\"skip\": 1\n}");
     $response = curl_exec($curl);
     $json_search_query2 = json_decode($response,true);
     // var_dump($json_search_query2);
     $count_query2 =  count($json_search_query2['result']);
 
+    $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu'];
+
+    //controllo per eliminare gli agenti licenziati ma recuperando le loro pratiche
 
     $elenco_pratiche_da_riassegnare=[];
-    for ($i=0; $i < $count_query1; $i++) { 
-        $elenco_pratiche_da_riassegnare []= $json_search_query1['result'][$i]['praticaID'];
+
+    for ($i=0; $i < count($agenti_da_eliminare); $i++) { 
+        for ($y=0; $y < count($json_search_query1['result']); $y++) { 
+            if($agenti_da_eliminare[$i] == $json_search_query1['result'][$y]['agente']){
+                echo 'Pratice da riassegnare ' . $json_search_query1['result'][$y]['praticaID'] . '<br>';
+                $elenco_pratiche_da_riassegnare[] = $json_search_query1['result'][$y]['praticaID'];
+                $dati_da_cancellare['result'][]= $json_search_query1['result'][$y];     
+            }
+        }
+    }
+    
+    if(count($dati_da_cancellare['result'])>0){
+        for ($i=0; $i < count($dati_da_cancellare['result']); $i++) { 
+            for ($y=0; $y < count($json_search_query1['result']); $y++) {
+                 if($json_search_query1['result'][$y] == null){
+                    continue;
+                } 
+                if($dati_da_cancellare['result'][$i]['praticaID'] == $json_search_query1['result'][$y]['praticaID']){
+                    echo 'remove this: ' . $dati_da_cancellare['result'][$i]['agente'] . ' '. $json_search_query1['result'][$y]['praticaID'] . '<br>';
+                    // echo 'PRIMO';
+                    // unset($json_search_query1['result'][$y]);
+                    $json_search_query1['result'][$y] = null;
+                    // $json_search_query3= array_diff($json_search_query1, [$json_search_query1['result'][$y]]);
+                }
+            }
+        }
+    }
+    // echo 'ELENCO PRATICHE BEFORE:';
+    // var_dump($elenco_pratiche_da_riassegnare);
+    for ($i=count($elenco_pratiche_da_riassegnare); $i < count($json_search_query1['result']); $i++) { 
+        if($json_search_query1['result'][$i] == null){
+            $elenco_pratiche_da_riassegnare[$i]=null;
+            continue;
+        }
+        $elenco_pratiche_da_riassegnare[$i] = $json_search_query1['result'][$i]['praticaID'];
     }
     echo 'ELENCO PRATICHE:';
     var_dump($elenco_pratiche_da_riassegnare);
-    $count += count($elenco_pratiche_da_riassegnare);
+
+    // echo 'count js1:';
+    // var_dump(count($json_search_query1['result']));
 
    //CREAZIONE ARRAY AGENTI CON PRATICHE AFFIDATE AD ESSI
-    for ($i=0; $i < $count_query1; $i++) { 
+    for ($i=0; $i < count($json_search_query1['result']); $i++) { 
+        if($json_search_query1['result'][$i] == null){
+            continue;
+        }
         $elenco_agenti_disponibili[$i]= $json_search_query1['result'][$i]['agente'];
     }
     $count_array1 = count($elenco_agenti_disponibili) +1;
@@ -60,10 +100,17 @@
     // echo 'ELENCO AGENTI DISPONIBILI';
     // var_dump($elenco_agenti_disponibili);
 
+    // echo 'ELENCO AGENTI DA ELIMINAREI';
+    // var_dump($agenti_da_eliminare);
 
-    //MYSQL FOR TAKE DATA
 
-    //connesione db
+   
+   
+
+
+//     //MYSQL FOR TAKE DATA
+
+//     //connesione db
     $servername = "34.82.67.217";
     $username_db = "SolPrest";
     $password_db = "SolPrest2020!";
@@ -114,10 +161,13 @@
     var_dump($totale_pratiche_per_agente);
 
     for ($i=0; $i < count($elenco_pratiche_da_riassegnare); $i++) { 
+        
         asort($totale_pratiche_per_agente);
+        
         // var_dump($totale_pratiche_per_agente);
         $nome_prima_posizione = key($totale_pratiche_per_agente);
         for ($y=0; $y < count($elenco_totale_agenti) ; $y++) { 
+            
             if($elenco_totale_agenti[$y]['nomevisualizzato'] == $nome_prima_posizione){
                 $agenteId = $elenco_totale_agenti[$y]['agenteID'];
                 $email1 = $elenco_totale_agenti[$y]['email1'];
@@ -136,16 +186,7 @@
     echo 'ELENCO FINALE ORDINATO: ' . '<br>';
     var_dump($totale_pratiche_per_agente);
     
-    echo 'Totale pratiche processate: ' . $count .'<br>';
-    
-    // sleep(10);
-    // //redirect per altro script
-    // echo 'Lancio Script: NON RISPONDE 2' . '<br>';
-    // $script= file_get_contents('http://localhost:8888/riassegnamento_automatico/riassegnamento_automatico_non_risponde_2.php');
-    // if($script == true){
-    //     echo 'Success' . '<br>';
-    //     echo $script;
-    // }
+ 
 
 
  
@@ -238,4 +279,4 @@
 <!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 500,\n\t\"skip\": 0\n}", -->
 
 <!-- laststato non risponde + datamod < lastweek -->
-<!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$gte\":\"$previous_week T00:00:00+01:00\"},\n\t\t\"laststato\": \"NON RISPO
+<!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$gte\":\"$previous_week T00:00:00+01:00\"},\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}", -->

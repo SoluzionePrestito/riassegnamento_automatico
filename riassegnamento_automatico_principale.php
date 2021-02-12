@@ -17,7 +17,7 @@
 
 
         echo 'Lancio Script: ' . $stato . ' con Data: ' . $data . '<br>';
-        $script1= file_get_contents('http://localhost:8888/riassegnamento_automatico/riassegnamento_automatico_non_risponde.php/?stato=' . $stato . '&data=' . $data . '&count=' . $count);
+        $script1= file_get_contents('http://localhost:8888/riassegnamento_automatico/riassegnamento_automatico.php/?stato=' . $stato . '&data=' . $data . '&count=' . $count);
         if($script1 == true){
             echo 'Success' . '<br>';
             echo $script1;
