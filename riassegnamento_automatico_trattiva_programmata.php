@@ -2,12 +2,12 @@
     if(isset($_GET['stato']) && isset($_GET['data'])){
         $stato = $_GET['stato'];
         $data = $_GET['data'];
-        echo 'IN' . '<br>';
     }else{
         exit('Errore su data o stato, riprovare');
     }
-
-
+    
+    // $stato = 'TRATTATIVA%20PROGRAMMATA';
+    // $data = $_GET['data'];
 
     if(isset($_GET['count'])){
         $count = $_GET['count'];
@@ -16,31 +16,54 @@
     $curl = curl_init();
     my_curl_setopt($curl);
     $response = curl_exec($curl);
+
     $lte ='lte';
     $json = json_decode($response,true);
     $access_token =  "Bearer " .$json['access_token'];
 
-    // $query = construct_query();
-
-    //QUERY SU OPPORTUNITY PER PRATICHE NON RISPONDE CON MODIFICA INFEIRORE A 7 GG
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$data T00:00:00+01:00\"},\n\t\t\"laststato\": \"$stato\"},\n\t\"limit\": 2000,\n\t\"skip\": 0\n}");
-    $response = curl_exec($curl);
-    $json_search_query1 = json_decode($response,true);
-    // var_dump($json_search_query1);
-    $count_query1 =  count($json_search_query1['result']);
-
-    
-//     //QUERY SU OPPORTUNITY PER PRATICHE NUOVO CONTATTO
-    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 2000,\n\t\"skip\": 1\n}");
-    $response = curl_exec($curl);
-    $json_search_query2 = json_decode($response,true);
-    // var_dump($json_search_query2);
-    $count_query2 =  count($json_search_query2['result']);
-
     $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu', 'Gianluca Madeddu', 'AREA MANAGER PUDDU', 'UFFICIO MARKETING' , '' , 'Fabio Zullo (A)'];
 
-    //controllo per eliminare gli agenti licenziati ma recuperando le loro pratiche su JS1
+    // $query = construct_query();
 
+    
+    $servername = "34.82.67.217";
+    $username_db = "dm_strategy";
+    $password_db = "DirectM";
+    $database = "EGG_DUMP";
+
+    $conn = new mysqli($servername, $username_db, $password_db, $database);
+
+    // VERIFICA DELLA CONNESSIONE
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    $sqlQuery = "SELECT * FROM $stato
+    WHERE laststato_datamodifica < '$data'
+    AND date_event < '$data'
+    LIMIT 2000;";
+
+    // $sqlQuery = "SELECT * FROM " . $stato . "WHERE laststato_datamodifica <" . " $data . ";
+    // $stmt = $conn->prepare($sqlQuery); 
+    // $stmt->bind_param('s' , $data);
+    // $stmt->execute();
+    // $result = $stmt->get_result();
+
+
+    $result = $conn->query($sqlQuery);
+
+    if ($result->num_rows > 0) {
+        // output data of each row
+        $i=0;
+        while($row = $result->fetch_assoc()) {
+            $json_search_query1['result'][$i]["agente"] = $row["agente"];
+            $json_search_query1['result'][$i]["agenteID"] = $row["agenteIDattuale"];
+            $json_search_query1['result'][$i]["praticaID"] = $row["praticaID"];
+            $i++;
+        }
+    } else {
+        echo "0 results";
+    }
+    
     $elenco_pratiche_da_riassegnare=[];
 
     for ($i=0; $i < count($agenti_da_eliminare); $i++) { 
@@ -65,6 +88,8 @@
             }
         }
     }
+    
+
     for ($i=count($elenco_pratiche_da_riassegnare); $i < count($json_search_query1['result']); $i++) { 
         if($json_search_query1['result'][$i] == null){
             $elenco_pratiche_da_riassegnare[$i]=null;
@@ -72,8 +97,19 @@
         }
         $elenco_pratiche_da_riassegnare[$i] = $json_search_query1['result'][$i]['praticaID'];
     }
+    // echo 'ELENCO QUERY';
+    // var_dump($json_search_query1);
+    
+    echo 'ELENCO PRATICHE:';
+    var_dump($elenco_pratiche_da_riassegnare);
 
-    //controllo per eliminare gli agenti licenziati ma recuperando le loro pratiche su JS2
+
+    //QUERY SU OPPORTUNITY PER PRATICHE NUOVO CONTATTO
+    my_curl_setopt_query($curl,$access_token,$query="{\n\t\"where\": {\n\t\t\"laststato\": \"NUOVO CONTATTO\"},\n\t\"limit\": 2000,\n\t\"skip\": 1\n}");
+    $response = curl_exec($curl);
+    $json_search_query2 = json_decode($response,true);
+    // var_dump($json_search_query2);
+
     for ($i=0; $i < count($agenti_da_eliminare); $i++) { 
         for ($y=0; $y < count($json_search_query2['result']); $y++) { 
             if($agenti_da_eliminare[$i] == $json_search_query2['result'][$y]['agente']){
@@ -90,19 +126,15 @@
                 } 
                 if($dati_da_cancellare['result'][$i]['praticaID'] == $json_search_query2['result'][$y]['praticaID']){
                     // echo 'remove this: ' . $dati_da_cancellare['result'][$i]['agente'] . ' ';
+                    // echo 'PRIMO';
+                    // unset($json_search_query1['result'][$y]);
                     $json_search_query2['result'][$y] = null;
+                    // $json_search_query3= array_diff($json_search_query1, [$json_search_query1['result'][$y]]);
                 }
             }
         }
     }
-    
-    echo 'ELENCO PRATICHE:';
-    var_dump($elenco_pratiche_da_riassegnare);
 
-    // echo 'count js1:';
-    // var_dump(count($json_search_query1['result']));
-
-   //CREAZIONE ARRAY AGENTI CON PRATICHE AFFIDATE AD ESSI
     for ($i=0; $i < count($json_search_query1['result']); $i++) { 
         if($json_search_query1['result'][$i] == null){
             continue;
@@ -119,31 +151,12 @@
         $elenco_agenti_disponibili[$count_array1]= $json_search_query2['result'][$i]['agente'];
         $count_array1++;
     }
-    // echo 'ELENCO AGENTI DISPONIBILI';
-    // var_dump($elenco_agenti_disponibili);
+    echo 'ELENCO AGENTI DISPONIBILI';
+    var_dump($elenco_agenti_disponibili);
 
-    // echo 'ELENCO AGENTI DA ELIMINAREI';
-    // var_dump($agenti_da_eliminare);
+    echo 'ELENCO AGENTI DA ELIMINAREI';
+    var_dump($agenti_da_eliminare);
 
-
-   
-   
-
-
-//     //MYSQL FOR TAKE DATA
-
-//     //connesione db
-    $servername = "34.82.67.217";
-    $username_db = "dm_strategy";
-    $password_db = "DirectM";
-    $database = "EGG_DUMP";
-
-    $conn = new mysqli($servername, $username_db, $password_db, $database);
-
-    // VERIFICA DELLA CONNESSIONE
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
     $sqlQuery = 'SELECT * FROM EGG_DUMP.INFO_VENDITORI';
     $result = $conn->query($sqlQuery);
     $elenco_totale_agenti=[];
@@ -183,7 +196,9 @@
     var_dump($totale_pratiche_per_agente);
 
     for ($i=0; $i < count($elenco_pratiche_da_riassegnare); $i++) { 
-        
+        if($elenco_pratiche_da_riassegnare[$i] == null){
+            continue;
+        }
         asort($totale_pratiche_per_agente);
         
         // var_dump($totale_pratiche_per_agente);
@@ -197,7 +212,7 @@
                 $manager_id = $elenco_totale_agenti[$y]['manager_id'];
                 echo 'Commerciale ID: ' . $agenteId . '. ' . 'Mail: ' . $email1  . '. ' . 'Sede: ' . $nomesede . '. ' . 'Manager: '. $manager_id . ' Pratica affidata: '. $elenco_pratiche_da_riassegnare[$i] . '<br>';
 
-                my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
+                // my_curl_setopt_update($curl,$access_token,$elenco_pratiche_da_riassegnare[$i],$agenteId,$nomesede,$manager_id);
                 // echo emailSide($email1,$elenco_pratiche_da_riassegnare[$i]) . '<br>' . '<br>';
             }
         }
@@ -207,16 +222,8 @@
     asort($totale_pratiche_per_agente);
     echo 'ELENCO FINALE ORDINATO: ' . '<br>';
     var_dump($totale_pratiche_per_agente);
-    
- 
 
-
- 
-
-
-
-
-
+    $conn->close();
 
 
     //FUNCTIONS
@@ -273,25 +280,25 @@
           echo $response = curl_exec($curl);
     }
 
-    function emailSide($to ,$praticaId){
-        $subject = 'Nuova pratica riassegnata';
-        $message = '<html>
-            <head>
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            </head>
-            <body>';
-        $message .= " <br> Ciao, ti è stata riassegnata la pratica numero: " . $praticaId ."</br>";
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= "From: <ufficiomarketing@soluzioneprestito.it>" . "\r\n";
+    // function emailSide($to ,$praticaId){
+    //     $subject = 'Nuova pratica riassegnata';
+    //     $message = '<html>
+    //         <head>
+    //         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    //         </head>
+    //         <body>';
+    //     $message .= " <br> Ciao, ti è stata riassegnata la pratica numero: " . $praticaId ."</br>";
+    //     $headers = "MIME-Version: 1.0" . "\r\n";
+    //     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    //     $headers .= "From: <ufficiomarketing@soluzioneprestito.it>" . "\r\n";
 
-        // mail($to, $subject, $message, $headers);
-        return 'Mail: ' . $message . ' To: ' . $to;
-    }
+    //     // mail($to, $subject, $message, $headers);
+    //     return 'Mail: ' . $message . ' To: ' . $to;
+    // }
 
-    function construct_query($time,$condizione){
-        $query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$time T00:00:00+01:00\"},\n\t\t\"laststato\": \"$condizione\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}";
-    }
+    // function construct_query($time,$condizione){
+    //     $query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$time T00:00:00+01:00\"},\n\t\t\"laststato\": \"$condizione\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}";
+    // }
 ?>
 
 <!-- //lastmodifica settimana scorsa -->

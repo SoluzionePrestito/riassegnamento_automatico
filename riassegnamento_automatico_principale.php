@@ -24,4 +24,28 @@
             sleep(10);
         }
     }
+
+    // $stati_data_evento = ['EGG_DUMP.APPUNTAMENTI','RINNOVABILI','TRATTATIVA_PROGRAMMATA'];
+
+    // $count = 0;
+
+    // for ($i=0; $i < count($stati_data_evento); $i++) { 
+    //     $stato = $stati_data_evento[$i];
+    //     if($stato == 'TRATTATIVA_PROGRAMMATA' || $stato == 'RINNOVABILI'){
+    //         $data = date("Y-m-d", strtotime("-1 month"));
+    //     }elseif($stato == 'EGG_DUMP.APPUNTAMENTI'){
+    //         $data = date("Y-m-d", strtotime("-15 days"));
+    //     }
+
+
+    //     echo 'Lancio Script: ' . $stato . ' con Data: ' . $data . '<br>';
+    //     $script1= file_get_contents('https://soluzioneprestito.it/Riassegnamento_automatico/riassegnamento_automatico_trattiva_programmata.php/?stato=' . $stato . '&data=' . $data . '&count=' . $count);
+    //     if($script1 == true){
+    //         echo 'Success' . '<br>';
+    //         echo $script1;
+    //         sleep(10);
+    //     }
+    // }
+
+    
 ?>
