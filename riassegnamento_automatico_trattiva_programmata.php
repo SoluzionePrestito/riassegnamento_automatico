@@ -21,7 +21,7 @@
     $json = json_decode($response,true);
     $access_token =  "Bearer " .$json['access_token'];
 
-    $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu', 'Gianluca Madeddu', 'AREA MANAGER PUDDU', 'UFFICIO MARKETING' , '' , 'Fabio Zullo (A)'];
+    $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu', 'Gianluca Madeddu', 'AREA MANAGER PUDDU', 'UFFICIO MARKETING' , '' , 'Fabio Zullo (A)','Cristina Sechi','Jessica Cacace'];
 
     // $query = construct_query();
 
@@ -300,12 +300,3 @@
     //     $query="{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$lte\":\"$time T00:00:00+01:00\"},\n\t\t\"laststato\": \"$condizione\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}";
     // }
 ?>
-
-<!-- //lastmodifica settimana scorsa -->
-<!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": \"25-01-2021\"},\n\t\"limit\": 500,\n\t\"skip\": 0\n}", -->
-
-<!-- //laststato non risponde -->
-<!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 500,\n\t\"skip\": 0\n}", -->
-
-<!-- laststato non risponde + datamod < lastweek -->
-<!-- CURLOPT_POSTFIELDS => "{\n\t\"where\": {\n\t\t\"laststato_datamodifica\": {\"$$gte\":\"$previous_week T00:00:00+01:00\"},\n\t\t\"laststato\": \"NON RISPONDE\"},\n\t\"limit\": 50,\n\t\"skip\": 0\n}", -->

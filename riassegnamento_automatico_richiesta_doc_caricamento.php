@@ -1,5 +1,5 @@
 <?php 
-    $un_mese_fa = date("Y-m-d", strtotime("-1 month"));
+    $un_mese_fa = date("Y-m-d", strtotime("-1 day"),strtotime($completeFields[0]['data_range_2']));
     echo $un_mese_fa;
     $lte ='lte';
     

@@ -37,7 +37,7 @@
     // var_dump($json_search_query2);
     $count_query2 =  count($json_search_query2['result']);
 
-    $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu', 'Gianluca Madeddu', 'AREA MANAGER PUDDU', 'UFFICIO MARKETING' , '' , 'Fabio Zullo (A)'];
+    $agenti_da_eliminare = ['Andrea Cossu','Daniele Dettori','Federica Fichera', 'Giulia Bovi' , 'Maria Gilda Caporaso' , 'Mirko Deiana' , 'Nadia Pennisi' , 'Roberta Marini' , 'Valentina Fanari' , 'Valentina Irmici' , 'Valentina Mereu', 'Gianluca Madeddu', 'AREA MANAGER PUDDU', 'UFFICIO MARKETING' , '' , 'Fabio Zullo (A)', 'Cristina Sechi','Jessica Cacace'];
 
     //controllo per eliminare gli agenti licenziati ma recuperando le loro pratiche su JS1
 
